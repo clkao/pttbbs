@@ -9,9 +9,9 @@
 
 typedef struct {
     char    filename[FNLEN];         /* M.9876543210.A */
-    char    pad0[78-FNLEN];
+    char    pad0[80-FNLEN];
     char    owner[IDLEN + 2];        /* uid[.] */
-    char    pad1[68];
+    char    pad1[66];
     char    title[65];
     char    pad2[31];
 } ffh_t;
