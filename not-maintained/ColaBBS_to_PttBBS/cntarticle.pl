@@ -1,12 +1,20 @@
 #!/usr/bin/perl
+# $Id$
 use IO::All;
 die "usage: cntarticle.pl [base dir]"
     if( !@ARGV );
 
-foreach( @ARGV ){
-    print "converting: $_\n";
-    convert($_)
-	foreach( <$_/M.*.A> );
+@proc = @ARGV;
+while( $dir = pop @proc ){
+    print "converting: $dir\n";
+    while( <$dir/*> ){
+	next if( /^\./ );
+	if( -d $_ ){
+	    push @proc, $_;
+	} elsif( /M\..*\.A/ ){
+	    convert($_);
+	}
+    }
 }
 
 sub convert

@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# $Id$
 use IO::All;
 die "usage: cntarticle.pl [base dir]"
     if( !@ARGV );

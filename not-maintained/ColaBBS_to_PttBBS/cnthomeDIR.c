@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "bbs.h"
 /* please run cnthomedir.pl first!
    cd home/; apply "mv %1/mail/* %1/" * / *

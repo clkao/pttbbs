@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "bbs.h"
 /*
     usage: apply "mv %1/.DIR %1/.DIR.colabbs; 

@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "bbs.h"
 /* usage: ./cntbrd < ColaBBS/.BOARDS > ~/.BRD */
 

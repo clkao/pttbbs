@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# $Id$
 # usage: cd ColaBBS/home; perl cnthomedir.pl
 use IO::All;
 foreach( <*> ){

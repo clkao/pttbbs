@@ -5,6 +5,7 @@ to do this. I hacked the data structures with only VERY LITTLE
 information directly from files, and these may NOT work. You sould NOT
 use if you don't have programming background, or contact(make a
 offer?) me in2 _AT_ in2home.org.
+the Id of this file is $Id$ .
 
 please follow the step:
 1. backup your ColaBBS.
@@ -34,3 +35,5 @@ please follow the step:
 	apply "rmdir %1/mail" */*;			\
 	apply "cnthomeDIR < %1/.DIR.colabbs > %1/.DIR";	\
 	cntarticle.pl */*
+8. tranfer man
+   use cntDIR to convert .DIR and cntarticle.pl for articles.
