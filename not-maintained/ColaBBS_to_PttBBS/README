@@ -1,9 +1,9 @@
 There're some tools for transfering data from ColaBBS
 (http://lh.twbbs.org/) to PttBBS (http://ptt.cc). Since ColaBBS
-doesn't provide its source code or any file spec, there's no good way
-to do this. I hacked the data structures with only VERY LITTLE
+doesn't provide its source code or any file spec, there's no shortcut
+for this. I hacked the data structures with only VERY LITTLE
 information directly from files, and these may NOT work. You sould NOT
-use if you don't have programming background, or contact(make a
+use if you don't have programming background, or contact(make an
 offer?) me in2 _AT_ in2home.org.
 the Id of this file is $Id$ .
 
@@ -25,15 +25,16 @@ please follow the step:
 	apply "mv %1/.DIR %1/.DIR.colabbs; cntDIR < %1/.DIR.colabbs >
                %1/.DIR" */*
 	cntbrd < _COLABBS_/boards/.BOARDS > ~/.BRD
-6. transfer password file:
-	cntpasswd < _COLABBS_/.PASSWDS > ~/.PASSWDS
-7. transfer mails
+6. transfer mails
 	cd _COLABBS_/home; cnthomedir.pl
 	cd ~/home/;
 	apply "mv %1/mail/* %1/" */*;			\
 	apply "mv %1/mail/.DIR %1/.DIR.colabbs" */*;	\
 	apply "rmdir %1/mail" */*;			\
-	apply "cnthomeDIR < %1/.DIR.colabbs > %1/.DIR";	\
+	apply "cnthomeDIR < %1/.DIR.colabbs > %1/.DIR" */* ;	\
 	cntarticle.pl */*
+7. transfer password file:
+	cntpasswd home/*/*/USERDATA.DAT > ~/.PASSWDS;	\
+	tunepasswd
 8. tranfer man
    use cntDIR to convert .DIR and cntarticle.pl for articles.
