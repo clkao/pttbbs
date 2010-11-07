@@ -906,34 +906,36 @@ my_write(pid_t pid, const char *prompt, const char *id, int flag, userinfo_t * p
 	int     write_pos = uin->msgcount; /* try to avoid race */
 	if ( write_pos < (MAX_MSGS - 1) ) { /* race here */
 	    unsigned char   pager0 = uin->pager;
+            msgque_t    *composing = &uin->msgs[write_pos];
 
 	    uin->msgcount = write_pos + 1;
+
 	    uin->pager = PAGER_DISABLE;
-	    uin->msgs[write_pos].pid = currpid;
+            composing->pid = currpid;
 #ifdef PLAY_ANGEL
 	    if (flag == WATERBALL_ANSWER || flag == WATERBALL_CONFIRM_ANSWER)
-		strlcpy(uin->msgs[write_pos].userid, "小天使", 
-		    sizeof(uin->msgs[write_pos].userid));
+		strlcpy(composing->userid, "小天使", 
+                        sizeof(composing->userid));
 	    else
 #endif
-		strlcpy(uin->msgs[write_pos].userid, cuser.userid,
-			sizeof(uin->msgs[write_pos].userid));
-	    strlcpy(uin->msgs[write_pos].last_call_in, msg,
-		    sizeof(uin->msgs[write_pos].last_call_in));
+		strlcpy(composing->userid, cuser.userid,
+			sizeof(composing->userid));
+	    strlcpy(composing->last_call_in, msg,
+		    sizeof(composing->last_call_in));
 #ifndef PLAY_ANGEL
-	    uin->msgs[write_pos].msgmode = MSGMODE_WRITE;
+	    composing->msgmode = MSGMODE_WRITE;
 #else
 	    switch (flag) {
 		case WATERBALL_ANGEL:
 		case WATERBALL_CONFIRM_ANGEL:
-		    uin->msgs[write_pos].msgmode = MSGMODE_TOANGEL;
+		    composing->msgmode = MSGMODE_TOANGEL;
 		    break;
 		case WATERBALL_ANSWER:
 		case WATERBALL_CONFIRM_ANSWER:
-		    uin->msgs[write_pos].msgmode = MSGMODE_FROMANGEL;
+		    composing->msgmode = MSGMODE_FROMANGEL;
 		    break;
 		default:
-		    uin->msgs[write_pos].msgmode = MSGMODE_WRITE;
+		    composing->msgmode = MSGMODE_WRITE;
 	    }
 #endif
 	    uin->pager = pager0;

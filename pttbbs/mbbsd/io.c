@@ -220,14 +220,15 @@ process_pager_keys(int ch)
 	    return KEY_INCOMPLETE;
 
 	    // TODO 醜死了的 code ，等好心人 refine
-	case Ctrl('R'):
+	case Ctrl('R'): {
+            msgque_t *responding = &currutmp->msgs[0];
 
 	    if (PAGER_UI_IS(PAGER_UI_OFO))
 	    {
 		int my_newfd;
 		screen_backup_t old_screen;
 
-		if (!currutmp->msgs[0].pid ||
+		if (!responding->pid ||
 		    wmofo != NOTREPLYING)
 		    break;
 
@@ -262,7 +263,7 @@ process_pager_keys(int ch)
 		return KEY_INCOMPLETE;
 	    } 
 	    else if (watermode == -1 && 
-		    currutmp->msgs[0].pid) 
+		    responding->pid) 
 	    {
 		/* 第一次按 Ctrl-R (必須先被丟過水球) */
 		screen_backup_t old_screen;
@@ -274,22 +275,22 @@ process_pager_keys(int ch)
 		show_call_in(0, 0);
 		watermode = 0;
 #ifndef PLAY_ANGEL
-		my_write(currutmp->msgs[0].pid, "水球丟過去： ",
-			currutmp->msgs[0].userid, WATERBALL_GENERAL, NULL);
+		my_write(responding->pid, "水球丟過去： ",
+			responding->userid, WATERBALL_GENERAL, NULL);
 #else
-		switch (currutmp->msgs[0].msgmode) {
+		switch (responding->msgmode) {
 		    case MSGMODE_TALK:
 		    case MSGMODE_WRITE:
-			my_write(currutmp->msgs[0].pid, "水球丟過去： ",
-				 currutmp->msgs[0].userid, WATERBALL_GENERAL, NULL);
+			my_write(responding->pid, "水球丟過去： ",
+				 responding->userid, WATERBALL_GENERAL, NULL);
 			break;
 		    case MSGMODE_FROMANGEL:
-			my_write(currutmp->msgs[0].pid, "再問祂一次： ",
-				 currutmp->msgs[0].userid, WATERBALL_ANGEL, NULL);
+			my_write(responding->pid, "再問祂一次： ",
+				 responding->userid, WATERBALL_ANGEL, NULL);
 			break;
 		    case MSGMODE_TOANGEL:
-			my_write(currutmp->msgs[0].pid, "回答小主人： ",
-				 currutmp->msgs[0].userid, WATERBALL_ANSWER, NULL);
+			my_write(responding->pid, "回答小主人： ",
+				 responding->userid, WATERBALL_ANSWER, NULL);
 			break;
 		}
 #endif
@@ -300,7 +301,7 @@ process_pager_keys(int ch)
 		return KEY_INCOMPLETE;
 	    }
 	    break;
-
+        }
 	case KEY_TAB:
 	    if (watermode <= 0 || 
 		(!PAGER_UI_IS(PAGER_UI_ORIG) || PAGER_UI_IS(PAGER_UI_NEW)))
