@@ -1187,6 +1187,10 @@ user_login(void)
     /* ªì©l¤Æ uinfo¡Bflag¡Bmode */
     setup_utmp(LOGIN);
 
+#ifdef BBSMQ
+    init_zmq();
+#endif
+
     /* log usies */
     log_usies("ENTER", fromhost);
 #ifndef VALGRIND
@@ -1441,6 +1445,10 @@ start_client(struct ProgramOption *option)
     // process new, register, and load user data
     load_current_user(option->flag_user);
     last_login_time = cuser.lastlogin;	// keep a backup
+
+#ifdef BBSMQ
+    boot_zmq();
+#endif
 
     m_init();			/* init the user mail path */
     user_login();
@@ -1800,9 +1808,6 @@ main(int argc, char *argv[], char *envp[])
     bool oklogin = false;
     struct ProgramOption *option;
 
-#ifdef BBSMQ
-    boot_zmq();
-#endif
     init();
 
     option = (struct ProgramOption*) malloc(sizeof(struct ProgramOption));
@@ -1840,9 +1845,6 @@ main(int argc, char *argv[], char *envp[])
     }
 
     start_client(option);
-#ifdef BBSMQ
-    init_zmq();
-#endif
     free_program_option(option);
 
     // tail recursion!

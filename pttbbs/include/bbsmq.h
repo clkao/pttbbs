@@ -3,7 +3,7 @@
 
 void boot_zmq();
 void init_zmq();
-void process_zmq();
+int process_zmq(int other_fd);
 void destroy_zmq();
 void z_sendit(char *name);
 

@@ -454,6 +454,13 @@ dogetch(void)
 
 	refresh();
 
+#ifdef BBSMQ
+        int ret = process_zmq(i_newfd);
+        if (ret) {
+            syncnow();
+            return ret;
+        }
+#else
 	if (i_newfd) {
 
 	    struct timeval  timeout;
@@ -489,9 +496,6 @@ dogetch(void)
 	    }
 	}
 
-#ifdef BBSMQ
-        process_zmq();
-#else
 #ifdef NOKILLWATERBALL
 	if( currutmp && currutmp->msgcount && !reentrant_write_request )
 	    write_request(1);

@@ -13,6 +13,8 @@ static void _debug(const char *fmt,...)
 {
     char   msg[512];
     va_list ap;
+    if (!context)
+        return;
     va_start(ap, fmt);
     vsnprintf(msg, sizeof(msg), fmt, ap);
     va_end(ap);
@@ -62,30 +64,44 @@ void init_zmq()
     }
 }
 
-void *get_zmq_sock(int type)
-{
-    _debug("zmq sock");
-    return zmq_socket(context, type);
-}
-
-void process_zmq()
+int process_zmq(int other_fd)
 {
     zmq_msg_t message;
-    zmq_pollitem_t items[1];
+    zmq_pollitem_t items[3];
+    int nfd = 1;
 
-    items[0].socket = write_receiver;
+    items[0].socket = NULL;
+    items[0].fd     = 0;
     items[0].events = ZMQ_POLLIN;
 
-    if(!context || !write_receiver)
-        return;
+    if (write_receiver) {
+        items[1].socket = write_receiver;
+        items[1].events = ZMQ_POLLIN;
+        ++nfd;
 
-    int rc = zmq_poll(items, 1, 0);
-    _debug("process zmq: %d", rc);
+        if (other_fd) {
+            items[2].socket = NULL;
+            items[2].fd     = other_fd;
+            items[2].events = ZMQ_POLLIN;
+            ++nfd;
+        }
+    }
 
-    if (!rc) return;
+    STATINC(STAT_SYSSELECT);
+    int rc = zmq_poll(items, nfd, -1);
+    int has_data = 0;
+    _debug("process zmq: %d / %d", rc, nfd);
+
+    if (!rc) return I_TIMEOUT;
 
     if (items[0].revents & ZMQ_POLLIN) {
+        _debug("has 0");
+        has_data = 1;
+    }
+
+    if (nfd > 1 && items[1].revents & ZMQ_POLLIN) {
         int i = 0;
+        _debug("has zmq");
         while(i++ < BBSMQ_MESSAGE_PER_INVOCATION) {
             zmq_msg_init(&message);
             if (zmq_recv(write_receiver, &message, ZMQ_NOBLOCK)) {
@@ -102,6 +118,13 @@ void process_zmq()
             zmq_msg_close(&message);
         }
     }
+
+    if (other_fd && items[2].revents & ZMQ_POLLIN) {
+        _debug("has other fd");
+        return I_OTHERDATA;
+    }
+
+    return has_data ? 0 : I_TIMEOUT;
 }
 
 void z_sendit(char *name)
