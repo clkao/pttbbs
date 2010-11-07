@@ -2927,12 +2927,14 @@ talkreply(void)
     prints("       (1) %s？先拿$100來"
 	   "       (2) %s？先拿$1000來..\n\n", sig_des[sig], sig_des[sig]);
 
+    msgque_t *talk_request = &currutmp->msgs[0];
+
     getuser(uip->userid, &xuser);
-    currutmp->msgs[0].pid = uip->pid;
-    strlcpy(currutmp->msgs[0].userid, uip->userid, sizeof(currutmp->msgs[0].userid));
-    strlcpy(currutmp->msgs[0].last_call_in, "呼叫、呼叫，聽到請回答 (Ctrl-R)",
-	    sizeof(currutmp->msgs[0].last_call_in));
-    currutmp->msgs[0].msgmode = MSGMODE_TALK;
+    talk_request->pid = uip->pid;
+    strlcpy(talk_request->userid, uip->userid, sizeof(talk_request->userid));
+    strlcpy(talk_request->last_call_in, "呼叫、呼叫，聽到請回答 (Ctrl-R)",
+	    sizeof(talk_request->last_call_in));
+    talk_request->msgmode = MSGMODE_TALK;
     prints("對方來自 [%s]，" STR_LOGINDAYS " %d " STR_LOGINDAYS_QTY "，文章共 %d 篇\n",
 	    uip->from, xuser.numlogindays, xuser.numposts);
 
