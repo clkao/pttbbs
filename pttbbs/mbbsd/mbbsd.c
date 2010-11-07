@@ -220,6 +220,9 @@ u_exit(const char *mode)
 
     purge_utmp(currutmp);
     log_usies(mode, NULL);
+#ifdef BBSMQ
+    destroy_zmq();
+#endif
 }
 
 void
@@ -496,7 +499,7 @@ write_request(int sig)
     int             i, msgcount;
 
     STATINC(STAT_WRITEREQUEST);
-#ifdef NOKILLWATERBALL
+#ifdef NOKILLWATERBALL || BBSMQ
     if( reentrant_write_request ) /* kill again by shmctl */
 	return;
     reentrant_write_request = 1;
@@ -587,7 +590,7 @@ write_request(int sig)
 	    currutmp->msgcount = 0;
 	}
     }
-#ifdef NOKILLWATERBALL
+#ifdef NOKILLWATERBAL || BBSMQL
     reentrant_write_request = 0;
     currutmp->wbtime = 0; /* race */
 #endif
@@ -1797,6 +1800,9 @@ main(int argc, char *argv[], char *envp[])
     bool oklogin = false;
     struct ProgramOption *option;
 
+#ifdef BBSMQ
+    boot_zmq();
+#endif
     init();
 
     option = (struct ProgramOption*) malloc(sizeof(struct ProgramOption));
@@ -1834,6 +1840,9 @@ main(int argc, char *argv[], char *envp[])
     }
 
     start_client(option);
+#ifdef BBSMQ
+    init_zmq();
+#endif
     free_program_option(option);
 
     // tail recursion!

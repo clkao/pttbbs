@@ -489,11 +489,14 @@ dogetch(void)
 	    }
 	}
 
+#ifdef BBSMQ
+        process_zmq();
+#else
 #ifdef NOKILLWATERBALL
 	if( currutmp && currutmp->msgcount && !reentrant_write_request )
 	    write_request(1);
 #endif
-
+#endif
 	STATINC(STAT_SYSREADSOCKET);
 
 	do {

@@ -1,0 +1,36 @@
+this is the experimental branch of ptt code with zmq.
+
+currently it does very minimum to see if this is a practical solution,
+in terms of performance and footprint, for making ptt code more
+distributed and service-oriented.
+
+the current code does the following:
+
+- it injects a zmq_poll call in dogetch of io.c, which is the main
+  blocking call (from vkey()).  once igetch() is merged with
+  vkey_poll, we can use zmq_poll as the main polling function.
+
+- when user a tries to send a message to user b, it connects to the
+  zmq socket user b is listening and sends a empty message.
+
+- for each process, it listens to ipc:///tmp/write/$pid for write
+  requests.  an empty message is sent by the message caller, no
+  message is transmitted yet.
+
+to use it, rebuild with -DBBSMQ and mkdir /tmp/write
+
+ROADMAP
+
+- make write function send actual message over the zmq channel instead
+  of writing directly to shm.
+
+- split the board r/w logic into a req/rep pattern of messaging. use
+  inproc://board.$boardname for now.  we can then make some of the
+  loaded boards off the main server by simply switching to tcp://.
+
+- make a global/shared pub/sub zmq channel.  we can have enveloped messages like:
+  "message.$username"
+  "global.message"
+  "newpost.$boardname"
+  "newcomment.$boardname.$article"
+  etc.

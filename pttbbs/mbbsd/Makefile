@@ -9,6 +9,9 @@ SRCROOT=	..
 
 PROG=	mbbsd
 COREOBJS = bbs.o announce.o read.o board.o brc.o mail.o record.o fav.o
+.if defined(BBSMQ)
+COREOBJS += bbsmq.o
+.endif
 ABUSEOBJS = captcha.o
 ACCOBJS  = user.o acl.o register.o passwd.o emaildb.o
 NETOBJS  = mbbsd.o io.o term.o telnet.o
@@ -73,6 +76,10 @@ DIETCC:=	diet -Os
 LDFLAGS+=-Wl,--sort-common
 .endif
 
+.if defined(BBSMQ)
+CFLAGS+=-DBBSMQ
+LDFLAGS+=-lzmq
+.endif
 #.if defined(MERGEBBS)
 #CFLAGS+= -DMERGEBBS
 #OBJS+= ../upgrade/merge_sob.o

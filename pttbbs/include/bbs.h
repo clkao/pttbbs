@@ -9,6 +9,10 @@ extern "C" {
 
 #include "osdep.h"
 
+#ifdef BBSMQ
+#include "bbsmq.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>

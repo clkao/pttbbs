@@ -1,6 +1,7 @@
 /* $Id$ */
 #include "bbs.h"
 #include "daemons.h"
+#include "bbsmq.h"
 
 #define QCAST   int (*)(const void *, const void *)
 
@@ -711,6 +712,29 @@ my_write2(void)
     wmofo = NOTREPLYING;
 }
 
+int
+_do_write(userinfo_t *uin)
+{
+
+#ifdef BBSMQ
+    char buf[128];
+
+    z_write_socket(buf, uin->pid);
+    z_sendit(buf);
+
+    return 1;
+#else
+
+#ifdef NOKILLWATERBALL
+    return !(uin->wbtime = now); /* race */
+#else
+    return (uin->pid <= 0 || kill(uin->pid, SIGUSR2) == -1);
+#endif
+
+#endif
+
+}
+
 /*
  * 被呼叫的時機:
  * 1. 丟群組水球 flag = WATERBALL_PREEDIT, 1 (pre-edit)
@@ -942,12 +966,7 @@ my_write(pid_t pid, const char *prompt, const char *id, int flag, userinfo_t * p
 	} else if (flag != WATERBALL_ALOHA)
 	    outmsg(ANSI_COLOR(1;33;41) "糟糕! 對方不行了! (收到太多水球) " ANSI_COLOR(37) "@_@" ANSI_RESET);
 
-	if (uin->msgcount >= 1 &&
-#ifdef NOKILLWATERBALL
-	    !(uin->wbtime = now) /* race */
-#else
-	    (uin->pid <= 0 || kill(uin->pid, SIGUSR2) == -1) 
-#endif
+	if (uin->msgcount >= 1 && _do_write(uin)
 	    && flag != WATERBALL_ALOHA)
 	    outmsg(ANSI_COLOR(1;33;41) "糟糕! 沒打中! " ANSI_COLOR(37) "~>_<~" ANSI_RESET);
 	else if (uin->msgcount == 1 && flag != WATERBALL_ALOHA)
@@ -2418,10 +2437,12 @@ userlist(void)
 				    uentp->msgcount = write_pos + 1;
 				    memcpy(&uentp->msgs[write_pos], &msg,
 					   sizeof(msg));
+#ifndef BBSMQ
 #ifdef NOKILLWATERBALL
 				    uentp->wbtime = now;
 #else
 				    kill(uentp->pid, SIGUSR2);
+#endif
 #endif
 				}
 			    }
