@@ -34,3 +34,11 @@ ROADMAP
   "newpost.$boardname"
   "newcomment.$boardname.$article"
   etc.
+
+MESSAGE PATTERN SKETCH
+
+- each processs should open two zmq socket:
+
+  - req/rep sock to be served by workers through a queue device, making api calls to database or game services
+
+  - pub/sub for push notification such as message, new article or comment of subscription, etc.
