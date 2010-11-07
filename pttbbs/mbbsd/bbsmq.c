@@ -64,6 +64,8 @@ void init_zmq()
     }
 }
 
+extern void write_request_msg(msgque_t *);
+
 int process_zmq(int other_fd)
 {
     zmq_msg_t message;
@@ -112,8 +114,14 @@ int process_zmq(int other_fd)
                 break;
             }
 
-            if( currutmp && currutmp->msgcount && !reentrant_write_request )
-                write_request(1);
+            if( currutmp ) { // && currutmp->msgcount && !reentrant_write_request ) {
+                int size = zmq_msg_size(&message);
+                assert(size == sizeof(msgque_t));
+                msgque_t *msg = malloc(sizeof(msgque_t));
+                memcpy(msg, zmq_msg_data(&message), size);
+
+                write_request_msg(msg);
+            }
 
             zmq_msg_close(&message);
         }
@@ -127,7 +135,7 @@ int process_zmq(int other_fd)
     return has_data ? 0 : I_TIMEOUT;
 }
 
-void z_sendit(char *name)
+void z_sendit(char *name, void *data, size_t size)
 {
     void *sendit = zmq_socket(context, ZMQ_PUSH);
     int rc;
@@ -139,7 +147,8 @@ void z_sendit(char *name)
         _debug("failed to connect to %s: %s", name,zmq_strerror(errno));
     }        
 
-    zmq_msg_init_size(&message, 0);
+    zmq_msg_init_size(&message, size);
+    memcpy(zmq_msg_data(&message), data, size);
 
     rc = zmq_send(sendit, &message, ZMQ_NOBLOCK);
     if (rc) {

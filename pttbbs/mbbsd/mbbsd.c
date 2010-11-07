@@ -494,6 +494,13 @@ add_history(const msgque_t * msg)
 }
 
 void
+write_request_msg(msgque_t *msg)
+{
+    memcpy(&currutmp->msgs[currutmp->msgcount-1], msg, sizeof(msgque_t));
+    write_request(1);
+}
+
+void
 write_request(int sig)
 {
     int             i, msgcount;
@@ -590,7 +597,7 @@ write_request(int sig)
 	    currutmp->msgcount = 0;
 	}
     }
-#ifdef NOKILLWATERBAL || BBSMQL
+#ifdef NOKILLWATERBAL || BBSMQ
     reentrant_write_request = 0;
     currutmp->wbtime = 0; /* race */
 #endif

@@ -713,14 +713,14 @@ my_write2(void)
 }
 
 int
-_do_write(userinfo_t *uin)
+_do_write(userinfo_t *uin, msgque_t *msg)
 {
 
 #ifdef BBSMQ
     char buf[128];
 
     z_write_socket(buf, uin->pid);
-    z_sendit(buf);
+    z_sendit(buf, (void *)msg, sizeof(msgque_t));
 
     return 1;
 #else
@@ -927,10 +927,11 @@ my_write(pid_t pid, const char *prompt, const char *id, int flag, userinfo_t * p
 	       ) {
 	outmsg(ANSI_COLOR(1;33;41) "糟糕! 對方防水了! " ANSI_COLOR(37) "~>_<~" ANSI_RESET);
     } else {
-	int     write_pos = uin->msgcount; /* try to avoid race */
+	int       write_pos = uin->msgcount; /* try to avoid race */
+        msgque_t c_msg, *composing = &c_msg;
+        //uin->msgs[write_pos];
 	if ( write_pos < (MAX_MSGS - 1) ) { /* race here */
 	    unsigned char   pager0 = uin->pager;
-            msgque_t    *composing = &uin->msgs[write_pos];
 
 	    uin->msgcount = write_pos + 1;
 
@@ -966,7 +967,7 @@ my_write(pid_t pid, const char *prompt, const char *id, int flag, userinfo_t * p
 	} else if (flag != WATERBALL_ALOHA)
 	    outmsg(ANSI_COLOR(1;33;41) "糟糕! 對方不行了! (收到太多水球) " ANSI_COLOR(37) "@_@" ANSI_RESET);
 
-	if (uin->msgcount >= 1 && _do_write(uin)
+	if (uin->msgcount >= 1 && _do_write(uin, &c_msg)
 	    && flag != WATERBALL_ALOHA)
 	    outmsg(ANSI_COLOR(1;33;41) "糟糕! 沒打中! " ANSI_COLOR(37) "~>_<~" ANSI_RESET);
 	else if (uin->msgcount == 1 && flag != WATERBALL_ALOHA)
